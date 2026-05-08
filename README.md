@@ -83,7 +83,7 @@ All three are essential: without N+S, AI improvises; without S+O, AI restructure
 
 ## Features
 
-- **Cross-platform**: Supports Cursor, Claude Code, GitHub Copilot, and Antigravity
+- **Cross-platform**: Supports Cursor, Claude Code, GitHub Copilot, Antigravity, and OpenCode
 - **Auto-detection**: Automatically detects your AI coding environment
 - **Single Binary**: All templates embedded via Go's embed directive
 - **Bidirectional Sync**: Keep design documents and code in sync
@@ -243,6 +243,7 @@ openspdd --tool cursor <command>
 openspdd --tool claude-code <command>
 openspdd --tool antigravity <command>
 openspdd --tool github-copilot <command>
+openspdd --tool opencode <command>
 ```
 
 ## Supported Environments
@@ -253,6 +254,7 @@ openspdd --tool github-copilot <command>
 | Claude Code    | `.claude/`, `CLAUDE.md`                                       | `.claude/commands/`        |
 | Antigravity    | `.antigravity/`                                               | `.antigravity/commands/`   |
 | GitHub Copilot | `.github/copilot-instructions.md`, `.github/copilot-prompts/` | `.github/copilot-prompts/` |
+| OpenCode       | `.opencode/`, `opencode.json`                                 | `.opencode/commands/`      |
 
 ### GitHub Copilot File Structure
 

@@ -92,6 +92,25 @@ func TestParseToolFlag_GitHubCopilot(t *testing.T) {
 	}
 }
 
+func TestParseToolFlag_OpenCode(t *testing.T) {
+	tests := []struct {
+		input string
+		want  detector.AIToolType
+	}{
+		{"opencode", detector.OpenCode},
+		{"OpenCode", detector.OpenCode},
+		{"OPENCODE", detector.OpenCode},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			if got := cmd.ParseToolFlag(tt.input); got != tt.want {
+				t.Errorf("ParseToolFlag(%q) = %v, want %v", tt.input, got, tt.want)
+			}
+		})
+	}
+}
+
 func TestParseToolFlag_Unknown(t *testing.T) {
 	tests := []struct {
 		input string
@@ -120,6 +139,7 @@ func TestParseToolFlag_AllValidToolsReturnValidType(t *testing.T) {
 		"claude-code", "claude",
 		"antigravity",
 		"github-copilot", "copilot", "gh-copilot",
+		"opencode",
 	}
 
 	for _, tool := range validTools {

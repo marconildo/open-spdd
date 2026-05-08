@@ -123,6 +123,7 @@ func (m *EmbeddedTemplateManager) ListAll() ([]TemplateMeta, error) {
 		detector.ClaudeCode,
 		detector.Antigravity,
 		detector.GitHubCopilot,
+		detector.OpenCode,
 	}
 
 	for _, tool := range knownTools {

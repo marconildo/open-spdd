@@ -85,7 +85,7 @@ REASONS Canvas 是一个 7 维度的结构化设计框架：
 
 ## 核心特性
 
-- **跨平台支持**：适配 Cursor、Claude Code、GitHub Copilot、Antigravity
+- **跨平台支持**：适配 Cursor、Claude Code、GitHub Copilot、Antigravity、OpenCode
 - **自动检测**：自动识别当前 AI 编码环境
 - **单一二进制**：所有模板通过 Go embed 嵌入，无外部依赖
 - **双向同步**：设计文档与代码保持同步
@@ -251,6 +251,7 @@ openspdd --tool cursor <command>
 openspdd --tool claude-code <command>
 openspdd --tool antigravity <command>
 openspdd --tool github-copilot <command>
+openspdd --tool opencode <command>
 ```
 
 ## 支持的环境
@@ -261,6 +262,7 @@ openspdd --tool github-copilot <command>
 | Claude Code    | `.claude/`, `CLAUDE.md`                                       | `.claude/commands/`        |
 | Antigravity    | `.antigravity/`                                               | `.antigravity/commands/`   |
 | GitHub Copilot | `.github/copilot-instructions.md`, `.github/copilot-prompts/` | `.github/copilot-prompts/` |
+| OpenCode       | `.opencode/`, `opencode.json`                                 | `.opencode/commands/`      |
 
 ### GitHub Copilot 文件结构
 

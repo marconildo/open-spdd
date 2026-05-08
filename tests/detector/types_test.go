@@ -33,6 +33,11 @@ func TestAIToolType_String(t *testing.T) {
 			want:     "GitHub Copilot",
 		},
 		{
+			name:     "OpenCode returns human-readable name",
+			toolType: detector.OpenCode,
+			want:     "OpenCode",
+		},
+		{
 			name:     "Unknown returns Unknown",
 			toolType: detector.Unknown,
 			want:     "Unknown",
@@ -80,6 +85,11 @@ func TestAIToolType_GetConfigDir(t *testing.T) {
 			want:     ".github/copilot-prompts",
 		},
 		{
+			name:     "OpenCode config directory",
+			toolType: detector.OpenCode,
+			want:     ".opencode/commands",
+		},
+		{
 			name:     "Unknown returns empty string",
 			toolType: detector.Unknown,
 			want:     "",
@@ -120,6 +130,11 @@ func TestAIToolType_GetSignatureFiles(t *testing.T) {
 			name:     "GitHubCopilot signature files",
 			toolType: detector.GitHubCopilot,
 			want:     []string{".github/copilot-instructions.md", ".github/copilot-prompts"},
+		},
+		{
+			name:     "OpenCode signature files",
+			toolType: detector.OpenCode,
+			want:     []string{".opencode", "opencode.json"},
 		},
 		{
 			name:     "Unknown returns nil",
@@ -171,6 +186,11 @@ func TestAIToolType_GetInstructionFile(t *testing.T) {
 			want:     "",
 		},
 		{
+			name:     "OpenCode has no instruction file",
+			toolType: detector.OpenCode,
+			want:     "",
+		},
+		{
 			name:     "Unknown has no instruction file",
 			toolType: detector.Unknown,
 			want:     "",
@@ -210,6 +230,11 @@ func TestAIToolType_HasInstructionFile(t *testing.T) {
 		{
 			name:     "Antigravity has no instruction file",
 			toolType: detector.Antigravity,
+			want:     false,
+		},
+		{
+			name:     "OpenCode has no instruction file",
+			toolType: detector.OpenCode,
 			want:     false,
 		},
 		{
@@ -253,6 +278,11 @@ func TestAIToolType_GetToolDirName(t *testing.T) {
 			name:     "GitHubCopilot tool directory name",
 			toolType: detector.GitHubCopilot,
 			want:     "copilot",
+		},
+		{
+			name:     "OpenCode tool directory name",
+			toolType: detector.OpenCode,
+			want:     "opencode",
 		},
 		{
 			name:     "Unknown returns empty string",

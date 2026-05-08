@@ -73,6 +73,7 @@ func selectToolInteractively() detector.AIToolType {
 		huh.NewOption("Claude Code", "claude-code"),
 		huh.NewOption("Antigravity", "antigravity"),
 		huh.NewOption("GitHub Copilot", "github-copilot"),
+		huh.NewOption("OpenCode", "opencode"),
 	}
 
 	var selected string

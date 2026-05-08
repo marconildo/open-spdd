@@ -8,6 +8,7 @@ const (
 	ClaudeCode    AIToolType = "claude-code"
 	Antigravity   AIToolType = "antigravity"
 	GitHubCopilot AIToolType = "github-copilot"
+	OpenCode      AIToolType = "opencode"
 	Unknown       AIToolType = "unknown"
 )
 
@@ -22,6 +23,8 @@ func (t AIToolType) String() string {
 		return "Antigravity"
 	case GitHubCopilot:
 		return "GitHub Copilot"
+	case OpenCode:
+		return "OpenCode"
 	default:
 		return "Unknown"
 	}
@@ -38,6 +41,8 @@ func (t AIToolType) GetConfigDir() string {
 		return ".antigravity/commands"
 	case GitHubCopilot:
 		return ".github/copilot-prompts"
+	case OpenCode:
+		return ".opencode/commands"
 	default:
 		return ""
 	}
@@ -54,6 +59,8 @@ func (t AIToolType) GetSignatureFiles() []string {
 		return []string{".antigravity"}
 	case GitHubCopilot:
 		return []string{".github/copilot-instructions.md", ".github/copilot-prompts"}
+	case OpenCode:
+		return []string{".opencode", "opencode.json"}
 	default:
 		return nil
 	}
@@ -85,6 +92,8 @@ func (t AIToolType) GetToolDirName() string {
 		return "antigravity"
 	case GitHubCopilot:
 		return "copilot"
+	case OpenCode:
+		return "opencode"
 	default:
 		return ""
 	}

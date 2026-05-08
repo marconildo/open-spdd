@@ -157,6 +157,45 @@ func TestDefaultDetector_Detect_GitHubCopilotEnvironment_WithPromptsDir(t *testi
 	}
 }
 
+func TestDefaultDetector_Detect_OpenCodeEnvironment(t *testing.T) {
+	tempDir := t.TempDir()
+	openCodeDir := filepath.Join(tempDir, ".opencode")
+	if err := os.MkdirAll(openCodeDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	det := detector.NewDefaultDetector()
+	result := det.Detect(tempDir)
+
+	if !result.IsValid {
+		t.Error("Detect() should return valid result for OpenCode environment")
+	}
+	if result.ToolType != detector.OpenCode {
+		t.Errorf("Detect() ToolType = %v, want %v", result.ToolType, detector.OpenCode)
+	}
+	if result.ConfigPath != filepath.Join(tempDir, ".opencode/commands") {
+		t.Errorf("Detect() ConfigPath = %v, want %v", result.ConfigPath, filepath.Join(tempDir, ".opencode/commands"))
+	}
+}
+
+func TestDefaultDetector_Detect_OpenCodeJsonFile(t *testing.T) {
+	tempDir := t.TempDir()
+	openCodeJSON := filepath.Join(tempDir, "opencode.json")
+	if err := os.WriteFile(openCodeJSON, []byte("{}"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	det := detector.NewDefaultDetector()
+	result := det.Detect(tempDir)
+
+	if !result.IsValid {
+		t.Error("Detect() should return valid result for opencode.json file")
+	}
+	if result.ToolType != detector.OpenCode {
+		t.Errorf("Detect() ToolType = %v, want %v", result.ToolType, detector.OpenCode)
+	}
+}
+
 func TestDefaultDetector_Detect_GitHubOnly_NotCopilot(t *testing.T) {
 	tempDir := t.TempDir()
 	githubDir := filepath.Join(tempDir, ".github")
@@ -323,6 +362,12 @@ func TestDefaultDetector_GetConfigDirPath(t *testing.T) {
 			tool:       detector.GitHubCopilot,
 			workingDir: "/project",
 			want:       "/project/.github/copilot-prompts",
+		},
+		{
+			name:       "OpenCode config path",
+			tool:       detector.OpenCode,
+			workingDir: "/project",
+			want:       "/project/.opencode/commands",
 		},
 		{
 			name:       "Unknown tool returns empty",
