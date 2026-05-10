@@ -196,6 +196,72 @@ func TestDefaultDetector_Detect_OpenCodeJsonFile(t *testing.T) {
 	}
 }
 
+func TestDefaultDetector_Detect_CodexEnvironment_WithDirectory(t *testing.T) {
+	tempDir := t.TempDir()
+	codexDir := filepath.Join(tempDir, ".codex")
+	if err := os.MkdirAll(codexDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	det := detector.NewDefaultDetector()
+	result := det.Detect(tempDir)
+
+	if !result.IsValid {
+		t.Error("Detect() should return valid result for Codex environment")
+	}
+	if result.ToolType != detector.Codex {
+		t.Errorf("Detect() ToolType = %v, want %v", result.ToolType, detector.Codex)
+	}
+	if result.ConfigPath != filepath.Join(tempDir, ".agents/skills") {
+		t.Errorf("Detect() ConfigPath = %v, want %v", result.ConfigPath, filepath.Join(tempDir, ".agents/skills"))
+	}
+}
+
+func TestDefaultDetector_Detect_CodexEnvironment_WithConfigToml(t *testing.T) {
+	tempDir := t.TempDir()
+	codexDir := filepath.Join(tempDir, ".codex")
+	if err := os.MkdirAll(codexDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	configFile := filepath.Join(codexDir, "config.toml")
+	if err := os.WriteFile(configFile, []byte(""), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	det := detector.NewDefaultDetector()
+	result := det.Detect(tempDir)
+
+	if !result.IsValid {
+		t.Error("Detect() should return valid result for Codex environment with config.toml")
+	}
+	if result.ToolType != detector.Codex {
+		t.Errorf("Detect() ToolType = %v, want %v", result.ToolType, detector.Codex)
+	}
+	if result.ConfigPath != filepath.Join(tempDir, ".agents/skills") {
+		t.Errorf("Detect() ConfigPath = %v, want %v", result.ConfigPath, filepath.Join(tempDir, ".agents/skills"))
+	}
+}
+
+func TestDefaultDetector_Detect_Priority_CursorOverCodex(t *testing.T) {
+	tempDir := t.TempDir()
+
+	cursorDir := filepath.Join(tempDir, ".cursor")
+	codexDir := filepath.Join(tempDir, ".codex")
+	if err := os.MkdirAll(cursorDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(codexDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	det := detector.NewDefaultDetector()
+	result := det.Detect(tempDir)
+
+	if result.ToolType != detector.Cursor {
+		t.Errorf("Detect() should prioritize Cursor over Codex, got %v", result.ToolType)
+	}
+}
+
 func TestDefaultDetector_Detect_GitHubOnly_NotCopilot(t *testing.T) {
 	tempDir := t.TempDir()
 	githubDir := filepath.Join(tempDir, ".github")
@@ -368,6 +434,12 @@ func TestDefaultDetector_GetConfigDirPath(t *testing.T) {
 			tool:       detector.OpenCode,
 			workingDir: "/project",
 			want:       "/project/.opencode/commands",
+		},
+		{
+			name:       "Codex config path",
+			tool:       detector.Codex,
+			workingDir: "/project",
+			want:       "/project/.agents/skills",
 		},
 		{
 			name:       "Unknown tool returns empty",

@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"os"
-	"path/filepath"
 
 	"github.com/spf13/cobra"
 
@@ -11,9 +10,10 @@ import (
 )
 
 var (
-	forceFlag  bool
-	allFlag    bool
-	outputFlag string
+	forceFlag         bool
+	allFlag           bool
+	outputFlag        string
+	allowImplicitFlag bool
 )
 
 var generateCmd = &cobra.Command{
@@ -50,11 +50,11 @@ If no template name is specified, an interactive selection will be shown.`,
 		}
 
 		if len(args) > 0 {
-			generateSingleTemplate(args[0], targetDir)
+			generateSingleTemplate(args[0])
 			return
 		}
 
-		generateInteractively(targetDir)
+		generateInteractively()
 	},
 }
 
@@ -62,6 +62,7 @@ func init() {
 	generateCmd.Flags().BoolVarP(&forceFlag, "force", "f", false, "Overwrite existing files")
 	generateCmd.Flags().BoolVarP(&allFlag, "all", "a", false, "Generate all available templates")
 	generateCmd.Flags().StringVarP(&outputFlag, "output", "o", "", "Custom output directory (overrides detection)")
+	generateCmd.Flags().BoolVar(&allowImplicitFlag, "allow-implicit", false, "Allow implicit invocation of generated Codex skills (Codex only)")
 	rootCmd.AddCommand(generateCmd)
 }
 
@@ -77,68 +78,47 @@ func determineTargetDir() string {
 	return ""
 }
 
-func generateAllTemplates(targetDir string) {
-	if detectedResult.ToolType == detector.GitHubCopilot {
-		workingDir, _ := os.Getwd()
-		results := templateManager.GenerateForCopilot(workingDir, forceFlag)
-
-		var successCount, failCount int
-		for _, result := range results {
-			if result.Success {
-				successCount++
-				uiRenderer.RenderSuccess("Generated: " + result.FilePath)
-			} else {
-				failCount++
-				uiRenderer.RenderError("Failed: " + result.Message)
-			}
-		}
-
-		uiRenderer.RenderSuccess("Generation complete: " + formatCount(successCount, "succeeded") + ", " + formatCount(failCount, "failed"))
+func generateAllTemplates(_ string) {
+	workingDir, _ := os.Getwd()
+	mgr, ok := templateManager.(*templates.EmbeddedTemplateManager)
+	if !ok {
+		uiRenderer.RenderError("template manager is not the expected concrete type")
 		return
 	}
 
-	tmpls, err := templateManager.ListAvailable(detectedResult.ToolType)
-	if err != nil {
-		uiRenderer.RenderError("Failed to list templates: " + err.Error())
-		return
-	}
+	templates.AllowImplicitInvocation = allowImplicitFlag
+	strategy := templates.StrategyFor(detectedResult.ToolType, mgr)
+	results := strategy.GenerateAll(workingDir, forceFlag)
 
-	if len(tmpls) == 0 {
+	if len(results) == 0 {
 		uiRenderer.RenderWarning("No templates available")
 		return
 	}
 
 	var successCount, failCount int
-	for _, t := range tmpls {
-		result := generateTemplate(t, targetDir)
+	for _, result := range results {
 		if result.Success {
 			successCount++
 			uiRenderer.RenderSuccess("Generated: " + result.FilePath)
 		} else {
 			failCount++
-			uiRenderer.RenderError("Failed: " + t.Name + " - " + result.Message)
+			uiRenderer.RenderError("Failed: " + result.Message)
 		}
 	}
 
 	uiRenderer.RenderSuccess("Generation complete: " + formatCount(successCount, "succeeded") + ", " + formatCount(failCount, "failed"))
 }
 
-func generateSingleTemplate(name, targetDir string) {
+func generateSingleTemplate(name string) {
 	tmpl, err := templateManager.GetByName(name)
 	if err != nil {
 		uiRenderer.RenderError("Template not found: " + name)
 		return
 	}
-
-	result := generateTemplate(tmpl, targetDir)
-	if result.Success {
-		uiRenderer.RenderSuccess("Generated: " + result.FilePath)
-	} else {
-		uiRenderer.RenderError(result.Message)
-	}
+	generateOneViaStrategy(tmpl)
 }
 
-func generateInteractively(targetDir string) {
+func generateInteractively() {
 	tmpls, err := templateManager.ListAvailable(detectedResult.ToolType)
 	if err != nil {
 		uiRenderer.RenderError("Failed to list templates: " + err.Error())
@@ -155,26 +135,30 @@ func generateInteractively(targetDir string) {
 		uiRenderer.RenderError("Selection cancelled: " + err.Error())
 		return
 	}
-
-	result := generateTemplate(selected, targetDir)
-	if result.Success {
-		uiRenderer.RenderSuccess("Generated: " + result.FilePath)
-	} else {
-		uiRenderer.RenderError(result.Message)
-	}
+	generateOneViaStrategy(selected)
 }
 
-func generateTemplate(tmpl templates.TemplateMeta, targetDir string) templates.GenerateResult {
-	filename := tmpl.ID + ".md"
-	targetPath := filepath.Join(targetDir, filename)
-
-	req := templates.GenerateRequest{
-		TemplateName: tmpl.Name,
-		TargetPath:   targetPath,
-		Force:        forceFlag,
+// generateOneViaStrategy dispatches a single-template generation through
+// the registered GenerationStrategy for the active tool. This keeps Codex
+// skills (and any future archetype) consistent between --all and
+// per-template invocations.
+func generateOneViaStrategy(tmpl templates.TemplateMeta) {
+	workingDir, _ := os.Getwd()
+	mgr, ok := templateManager.(*templates.EmbeddedTemplateManager)
+	if !ok {
+		uiRenderer.RenderError("template manager is not the expected concrete type")
+		return
 	}
 
-	return templateManager.Generate(req)
+	templates.AllowImplicitInvocation = allowImplicitFlag
+	results := templates.StrategyFor(detectedResult.ToolType, mgr).GenerateOne(workingDir, tmpl, forceFlag)
+	for _, r := range results {
+		if r.Success {
+			uiRenderer.RenderSuccess("Generated: " + r.FilePath)
+		} else {
+			uiRenderer.RenderError(r.Message)
+		}
+	}
 }
 
 func formatCount(count int, label string) string {

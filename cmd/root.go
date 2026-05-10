@@ -25,7 +25,7 @@ var rootCmd = &cobra.Command{
 	Long: `SPDD (Structured Prompt-Driven Development) CLI tool for managing
 AI coding assistant command templates.
 
-Supports Cursor, Claude Code, Antigravity, GitHub Copilot, and OpenCode environments.
+Supports Cursor, Claude Code, Antigravity, GitHub Copilot, OpenCode, and Codex environments.
 Auto-detects your current environment and manages command templates.`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		det = detector.NewDefaultDetector()
@@ -49,7 +49,7 @@ Auto-detects your current environment and manages command templates.`,
 }
 
 func init() {
-	rootCmd.PersistentFlags().StringVarP(&toolFlag, "tool", "t", "", "Manually specify tool type (cursor, claude-code, antigravity, github-copilot, opencode)")
+	rootCmd.PersistentFlags().StringVarP(&toolFlag, "tool", "t", "", "Manually specify tool type (cursor, claude-code, antigravity, github-copilot, opencode, codex)")
 }
 
 func SetVersion(v string) {
@@ -99,6 +99,8 @@ func ParseToolFlag(flag string) detector.AIToolType {
 		return detector.GitHubCopilot
 	case "opencode":
 		return detector.OpenCode
+	case "codex":
+		return detector.Codex
 	default:
 		return detector.Unknown
 	}

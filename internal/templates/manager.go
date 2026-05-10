@@ -13,6 +13,10 @@ import (
 )
 
 // TemplateManager defines the interface for template operations.
+//
+// Per-tool generation behavior (e.g., Copilot's instruction-file merge,
+// Codex's skill-bundle output) is intentionally NOT exposed on this interface.
+// Use templates.StrategyFor(tool, mgr).GenerateAll(workingDir, force) instead.
 type TemplateManager interface {
 	ListCore() ([]TemplateMeta, error)
 	ListForTool(tool detector.AIToolType) ([]TemplateMeta, error)
@@ -21,7 +25,6 @@ type TemplateManager interface {
 	ListAll() ([]TemplateMeta, error)
 	GetByName(name string) (TemplateMeta, error)
 	Generate(req GenerateRequest) GenerateResult
-	GenerateForCopilot(targetDir string, force bool) []GenerateResult
 }
 
 // EmbeddedTemplateManager implements TemplateManager using embedded templates.
@@ -124,6 +127,7 @@ func (m *EmbeddedTemplateManager) ListAll() ([]TemplateMeta, error) {
 		detector.Antigravity,
 		detector.GitHubCopilot,
 		detector.OpenCode,
+		detector.Codex,
 	}
 
 	for _, tool := range knownTools {
@@ -229,87 +233,6 @@ const (
 	SPDDMarkerStart = "<!-- openspdd:start -->"
 	SPDDMarkerEnd   = "<!-- openspdd:end -->"
 )
-
-// GenerateForCopilot generates the complete Copilot file structure with marker-based merge support.
-func (m *EmbeddedTemplateManager) GenerateForCopilot(targetDir string, force bool) []GenerateResult {
-	var results []GenerateResult
-
-	githubDir := filepath.Join(targetDir, ".github")
-	if err := os.MkdirAll(githubDir, 0755); err != nil {
-		results = append(results, GenerateResult{
-			Success: false,
-			Message: "failed to create .github directory: " + err.Error(),
-			Error:   err,
-		})
-		return results
-	}
-
-	instructionContent, err := fs.ReadFile(embeddedTemplates, "data/tools/copilot/copilot-instructions.md")
-	if err != nil {
-		results = append(results, GenerateResult{
-			Success: false,
-			Message: "failed to read copilot-instructions template: " + err.Error(),
-			Error:   err,
-		})
-		return results
-	}
-
-	instructionPath := filepath.Join(githubDir, "copilot-instructions.md")
-	markedContent := SPDDMarkerStart + "\n" + string(instructionContent) + "\n" + SPDDMarkerEnd
-	result := m.writeInstructionFile(instructionPath, markedContent, force)
-	results = append(results, result)
-
-	promptsDir := filepath.Join(githubDir, "copilot-prompts")
-	if err := os.MkdirAll(promptsDir, 0755); err != nil {
-		results = append(results, GenerateResult{
-			Success: false,
-			Message: "failed to create copilot-prompts directory: " + err.Error(),
-			Error:   err,
-		})
-		return results
-	}
-
-	coreTemplates, err := m.ListCore()
-	if err != nil {
-		results = append(results, GenerateResult{
-			Success: false,
-			Message: "failed to list core templates: " + err.Error(),
-			Error:   err,
-		})
-		return results
-	}
-
-	for _, tmpl := range coreTemplates {
-		targetPath := filepath.Join(promptsDir, tmpl.ID+".md")
-		if _, err := os.Stat(targetPath); err == nil && !force {
-			results = append(results, GenerateResult{
-				Success:  false,
-				FilePath: targetPath,
-				Message:  "file already exists (use --force to overwrite)",
-				Error:    internal.ErrFileExists,
-			})
-			continue
-		}
-
-		if err := os.WriteFile(targetPath, []byte(tmpl.Content), 0644); err != nil {
-			results = append(results, GenerateResult{
-				Success:  false,
-				FilePath: targetPath,
-				Message:  "failed to write file: " + err.Error(),
-				Error:    err,
-			})
-			continue
-		}
-
-		results = append(results, GenerateResult{
-			Success:  true,
-			FilePath: targetPath,
-			Message:  "template generated successfully",
-		})
-	}
-
-	return results
-}
 
 func (m *EmbeddedTemplateManager) writeInstructionFile(path, markedContent string, force bool) GenerateResult {
 	existingContent, err := os.ReadFile(path)

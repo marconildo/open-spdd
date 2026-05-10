@@ -38,6 +38,11 @@ func TestAIToolType_String(t *testing.T) {
 			want:     "OpenCode",
 		},
 		{
+			name:     "Codex returns human-readable name",
+			toolType: detector.Codex,
+			want:     "Codex",
+		},
+		{
 			name:     "Unknown returns Unknown",
 			toolType: detector.Unknown,
 			want:     "Unknown",
@@ -90,6 +95,11 @@ func TestAIToolType_GetConfigDir(t *testing.T) {
 			want:     ".opencode/commands",
 		},
 		{
+			name:     "Codex config directory",
+			toolType: detector.Codex,
+			want:     ".agents/skills",
+		},
+		{
 			name:     "Unknown returns empty string",
 			toolType: detector.Unknown,
 			want:     "",
@@ -135,6 +145,11 @@ func TestAIToolType_GetSignatureFiles(t *testing.T) {
 			name:     "OpenCode signature files",
 			toolType: detector.OpenCode,
 			want:     []string{".opencode", "opencode.json"},
+		},
+		{
+			name:     "Codex signature files",
+			toolType: detector.Codex,
+			want:     []string{".codex", ".codex/config.toml"},
 		},
 		{
 			name:     "Unknown returns nil",
@@ -191,6 +206,11 @@ func TestAIToolType_GetInstructionFile(t *testing.T) {
 			want:     "",
 		},
 		{
+			name:     "Codex has no instruction file",
+			toolType: detector.Codex,
+			want:     "",
+		},
+		{
 			name:     "Unknown has no instruction file",
 			toolType: detector.Unknown,
 			want:     "",
@@ -235,6 +255,11 @@ func TestAIToolType_HasInstructionFile(t *testing.T) {
 		{
 			name:     "OpenCode has no instruction file",
 			toolType: detector.OpenCode,
+			want:     false,
+		},
+		{
+			name:     "Codex has no instruction file",
+			toolType: detector.Codex,
 			want:     false,
 		},
 		{
@@ -283,6 +308,11 @@ func TestAIToolType_GetToolDirName(t *testing.T) {
 			name:     "OpenCode tool directory name",
 			toolType: detector.OpenCode,
 			want:     "opencode",
+		},
+		{
+			name:     "Codex tool directory name",
+			toolType: detector.Codex,
+			want:     "codex",
 		},
 		{
 			name:     "Unknown returns empty string",

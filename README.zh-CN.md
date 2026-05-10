@@ -85,7 +85,7 @@ REASONS Canvas 是一个 7 维度的结构化设计框架：
 
 ## 核心特性
 
-- **跨平台支持**：适配 Cursor、Claude Code、GitHub Copilot、Antigravity、OpenCode
+- **跨平台支持**：适配 Cursor、Claude Code、GitHub Copilot、Antigravity、OpenCode、Codex
 - **自动检测**：自动识别当前 AI 编码环境
 - **单一二进制**：所有模板通过 Go embed 嵌入，无外部依赖
 - **双向同步**：设计文档与代码保持同步
@@ -252,6 +252,7 @@ openspdd --tool claude-code <command>
 openspdd --tool antigravity <command>
 openspdd --tool github-copilot <command>
 openspdd --tool opencode <command>
+openspdd --tool codex <command>
 ```
 
 ## 支持的环境
@@ -263,6 +264,11 @@ openspdd --tool opencode <command>
 | Antigravity    | `.antigravity/`                                               | `.antigravity/commands/`   |
 | GitHub Copilot | `.github/copilot-instructions.md`, `.github/copilot-prompts/` | `.github/copilot-prompts/` |
 | OpenCode       | `.opencode/`, `opencode.json`                                 | `.opencode/commands/`      |
+| Codex          | `.codex/`, `.codex/config.toml`                               | `.agents/skills/`          |
+
+### Codex Skills
+
+Codex 会以项目级 skill 包的形式生成命令模板，输出到 `.agents/skills/<id>/SKILL.md`（这是一个跨厂商的开放标准目录，详见 [agentskills.io](https://agentskills.io/)），而不是扁平的命令文件。在 Codex CLI / IDE 扩展中，请使用 `$spdd-analysis` 等形式或通过 `/skills` 菜单调用 SPDD 命令，**不要**使用 `/spdd-analysis`。生成的 skill 默认仅支持显式调用（`agents/openai.yaml` 中 `allow_implicit_invocation: false`）；如需让 Codex 自动隐式调用，请在生成时附加 `--allow-implicit`。**信任模型说明**：在部分 Codex 版本中，未受信任项目的 skill 会被静默忽略，如果生成后 skill 没有出现，请确认你的 `~/.codex/config.toml` 中已将该项目标记为受信任（参考 [openai/codex#9752](https://github.com/openai/codex/issues/9752)）。如果 skill 仍未出现，请按官方文档所述重启 Codex。
 
 ### GitHub Copilot 文件结构
 

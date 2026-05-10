@@ -415,7 +415,7 @@ func TestEmbeddedTemplateManager_GenerateForCopilot_Success(t *testing.T) {
 	tempDir := t.TempDir()
 
 	manager := templates.NewEmbeddedTemplateManager()
-	results := manager.GenerateForCopilot(tempDir, false)
+	results := templates.StrategyFor(detector.GitHubCopilot, manager).GenerateAll(tempDir, false)
 
 	if len(results) == 0 {
 		t.Fatal("GenerateForCopilot() should return at least one result")
@@ -452,7 +452,7 @@ func TestEmbeddedTemplateManager_GenerateForCopilot_InstructionFileMarkers(t *te
 	tempDir := t.TempDir()
 
 	manager := templates.NewEmbeddedTemplateManager()
-	manager.GenerateForCopilot(tempDir, false)
+	templates.StrategyFor(detector.GitHubCopilot, manager).GenerateAll(tempDir, false)
 
 	instructionFile := filepath.Join(tempDir, ".github", "copilot-instructions.md")
 	content, err := os.ReadFile(instructionFile)
@@ -494,7 +494,7 @@ Some custom content after SPDD.
 	}
 
 	manager := templates.NewEmbeddedTemplateManager()
-	results := manager.GenerateForCopilot(tempDir, false)
+	results := templates.StrategyFor(detector.GitHubCopilot, manager).GenerateAll(tempDir, false)
 
 	var instructionResult *templates.GenerateResult
 	for i, r := range results {
@@ -553,7 +553,7 @@ This file has no SPDD markers.
 	}
 
 	manager := templates.NewEmbeddedTemplateManager()
-	results := manager.GenerateForCopilot(tempDir, false)
+	results := templates.StrategyFor(detector.GitHubCopilot, manager).GenerateAll(tempDir, false)
 
 	var instructionResult *templates.GenerateResult
 	for i, r := range results {
@@ -599,7 +599,7 @@ This file has no SPDD markers.
 	}
 
 	manager := templates.NewEmbeddedTemplateManager()
-	results := manager.GenerateForCopilot(tempDir, true)
+	results := templates.StrategyFor(detector.GitHubCopilot, manager).GenerateAll(tempDir, true)
 
 	var instructionResult *templates.GenerateResult
 	for i, r := range results {
@@ -627,7 +627,7 @@ func TestEmbeddedTemplateManager_GenerateForCopilot_TemplatesGenerated(t *testin
 	tempDir := t.TempDir()
 
 	manager := templates.NewEmbeddedTemplateManager()
-	manager.GenerateForCopilot(tempDir, false)
+	templates.StrategyFor(detector.GitHubCopilot, manager).GenerateAll(tempDir, false)
 
 	promptsDir := filepath.Join(tempDir, ".github", "copilot-prompts")
 

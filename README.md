@@ -83,7 +83,7 @@ All three are essential: without N+S, AI improvises; without S+O, AI restructure
 
 ## Features
 
-- **Cross-platform**: Supports Cursor, Claude Code, GitHub Copilot, Antigravity, and OpenCode
+- **Cross-platform**: Supports Cursor, Claude Code, GitHub Copilot, Antigravity, OpenCode, and Codex
 - **Auto-detection**: Automatically detects your AI coding environment
 - **Single Binary**: All templates embedded via Go's embed directive
 - **Bidirectional Sync**: Keep design documents and code in sync
@@ -244,6 +244,7 @@ openspdd --tool claude-code <command>
 openspdd --tool antigravity <command>
 openspdd --tool github-copilot <command>
 openspdd --tool opencode <command>
+openspdd --tool codex <command>
 ```
 
 ## Supported Environments
@@ -255,6 +256,11 @@ openspdd --tool opencode <command>
 | Antigravity    | `.antigravity/`                                               | `.antigravity/commands/`   |
 | GitHub Copilot | `.github/copilot-instructions.md`, `.github/copilot-prompts/` | `.github/copilot-prompts/` |
 | OpenCode       | `.opencode/`, `opencode.json`                                 | `.opencode/commands/`      |
+| Codex          | `.codex/`, `.codex/config.toml`                               | `.agents/skills/`          |
+
+### Codex Skills
+
+Codex generates project-scoped skill bundles under `.agents/skills/<id>/SKILL.md` (a cross-vendor open-standard directory; see [agentskills.io](https://agentskills.io/)) — not flat command files. Inside the Codex CLI / IDE extension, invoke SPDD commands with `$spdd-analysis` (etc.) or via the `/skills` menu — **not** `/spdd-analysis`. Generated skills are configured for explicit-only invocation by default (`agents/openai.yaml` sets `allow_implicit_invocation: false`); pass `--allow-implicit` to opt into Codex's auto-invocation behavior. **Trust-model note**: on some Codex versions skills from untrusted projects are silently ignored — if the skills do not appear after generation, confirm the project is marked trusted in your `~/.codex/config.toml` (see [openai/codex#9752](https://github.com/openai/codex/issues/9752)). If the skills still do not appear after a generate run, restart Codex (per official docs).
 
 ### GitHub Copilot File Structure
 

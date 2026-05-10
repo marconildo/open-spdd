@@ -9,6 +9,7 @@ const (
 	Antigravity   AIToolType = "antigravity"
 	GitHubCopilot AIToolType = "github-copilot"
 	OpenCode      AIToolType = "opencode"
+	Codex         AIToolType = "codex"
 	Unknown       AIToolType = "unknown"
 )
 
@@ -25,6 +26,8 @@ func (t AIToolType) String() string {
 		return "GitHub Copilot"
 	case OpenCode:
 		return "OpenCode"
+	case Codex:
+		return "Codex"
 	default:
 		return "Unknown"
 	}
@@ -43,6 +46,8 @@ func (t AIToolType) GetConfigDir() string {
 		return ".github/copilot-prompts"
 	case OpenCode:
 		return ".opencode/commands"
+	case Codex:
+		return ".agents/skills"
 	default:
 		return ""
 	}
@@ -61,6 +66,8 @@ func (t AIToolType) GetSignatureFiles() []string {
 		return []string{".github/copilot-instructions.md", ".github/copilot-prompts"}
 	case OpenCode:
 		return []string{".opencode", "opencode.json"}
+	case Codex:
+		return []string{".codex", ".codex/config.toml"}
 	default:
 		return nil
 	}
@@ -94,6 +101,8 @@ func (t AIToolType) GetToolDirName() string {
 		return "copilot"
 	case OpenCode:
 		return "opencode"
+	case Codex:
+		return "codex"
 	default:
 		return ""
 	}
