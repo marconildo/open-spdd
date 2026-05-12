@@ -196,7 +196,11 @@ func (m *EmbeddedTemplateManager) Generate(req GenerateRequest) GenerateResult {
 		}
 	}
 
-	if _, err := os.Stat(targetPath); err == nil && !req.Force {
+	return m.generateWithContent(targetPath, template.Content, req.Force)
+}
+
+func (m *EmbeddedTemplateManager) generateWithContent(targetPath, content string, force bool) GenerateResult {
+	if _, err := os.Stat(targetPath); err == nil && !force {
 		return GenerateResult{
 			Success:  false,
 			FilePath: targetPath,
@@ -214,7 +218,7 @@ func (m *EmbeddedTemplateManager) Generate(req GenerateRequest) GenerateResult {
 		}
 	}
 
-	if err := os.WriteFile(targetPath, []byte(template.Content), 0644); err != nil {
+	if err := os.WriteFile(targetPath, []byte(content), 0644); err != nil {
 		return GenerateResult{
 			Success: false,
 			Message: "failed to write file: " + targetPath,
