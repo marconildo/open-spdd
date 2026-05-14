@@ -266,6 +266,8 @@ openspdd --tool codex <command>
 | OpenCode       | `.opencode/`, `opencode.json`                                 | `.opencode/commands/`      |
 | Codex          | `.codex/`, `.codex/config.toml`                               | `.agents/skills/`          |
 
+OpenCode 的命令名由 Markdown 文件名决定（例如 `spdd-analysis.md` 对应 `/spdd-analysis`）。为避免 OpenCode 中的命令别名冲突，生成到 OpenCode 的命令文件会有意省略 frontmatter `name` 字段。
+
 ### Codex Skills
 
 Codex 会以项目级 skill 包的形式生成命令模板，输出到 `.agents/skills/<id>/SKILL.md`（这是一个跨厂商的开放标准目录，详见 [agentskills.io](https://agentskills.io/)），而不是扁平的命令文件。在 Codex CLI / IDE 扩展中，请使用 `$spdd-analysis` 等形式或通过 `/skills` 菜单调用 SPDD 命令，**不要**使用 `/spdd-analysis`。生成的 skill 默认仅支持显式调用（`agents/openai.yaml` 中 `allow_implicit_invocation: false`）；如需让 Codex 自动隐式调用，请在生成时附加 `--allow-implicit`。**信任模型说明**：在部分 Codex 版本中，未受信任项目的 skill 会被静默忽略，如果生成后 skill 没有出现，请确认你的 `~/.codex/config.toml` 中已将该项目标记为受信任（参考 [openai/codex#9752](https://github.com/openai/codex/issues/9752)）。如果 skill 仍未出现，请按官方文档所述重启 Codex。

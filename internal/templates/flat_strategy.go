@@ -34,9 +34,16 @@ func (s *FlatMarkdownStrategy) GenerateOne(workingDir string, tmpl TemplateMeta,
 		targetDir = filepath.Join(workingDir, configDir)
 	}
 
+	targetPath := filepath.Join(targetDir, tmpl.ID+".md")
+	adapter := OpenCodeTemplateAdapter{}
+	if adapter.IsApplicable(s.tool) {
+		normalized := adapter.NormalizeForOpenCode(tmpl)
+		return []GenerateResult{s.manager.generateWithContent(targetPath, normalized, force)}
+	}
+
 	req := GenerateRequest{
 		TemplateName: tmpl.Name,
-		TargetPath:   filepath.Join(targetDir, tmpl.ID+".md"),
+		TargetPath:   targetPath,
 		Force:        force,
 	}
 	return []GenerateResult{s.manager.Generate(req)}
